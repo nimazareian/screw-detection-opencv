@@ -46,6 +46,15 @@ while True:
         img2, contours2 = utils.getContours(imgWarp, cannyThr=[thrS1, thrS2],
                                             gaussianBlur=(blurS, blurS), showCanny=True,
                                             minArea=0, filterEdges=0, draw=True)
+        if len(contours2) != 0:
+            for contour in contours2:
+                rect = cv2.minAreaRect(contour[2])
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                im = cv2.drawContours(img2, [box], 0, (0, 0, 255), 2)
+                # x, y, w, h = cv2.boundingRect(contour[2])
+                # cv2.rectangle(img2, (x,y), (x+w, y+h), (0,255, 0), 2)
+                # cv2.polylines(img2,[contour[2]], True, (0,255,0), 2) #True for closed
         cv2.imshow("Image 2", img2)
 
 
