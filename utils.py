@@ -4,9 +4,9 @@ import numpy as np
 def empty(val):
     pass
 
-def getContours(img, cannyThr=[200,200], showCanny=False, minArea=1000, filterEdges = 0, draw=False):
+def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, minArea=1000, filterEdges = 0, draw=False):
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    imgBlur = cv2.GaussianBlur(imgGray, (5,5),1)
+    imgBlur = cv2.GaussianBlur(imgGray, gaussianBlur,1) # Could tune blue value for better edges - GaussianBlue must be ODD and Positive
     imgCanny = cv2.Canny(imgBlur, cannyThr[0], cannyThr[1])
     kernel = np.ones((5,5))
     imgDial = cv2.dilate(imgCanny, kernel, iterations=3)
@@ -27,8 +27,8 @@ def getContours(img, cannyThr=[200,200], showCanny=False, minArea=1000, filterEd
                     print("# of edges", len(approx))
                     finalContours.append([len(approx), area, approx, bbox, i]) # Keep contour
             else:
-                print("NOOOT FilterEdges # of edges")
-                # finalContours.append([len(approx), area, approx, bbox, i])
+                # print("NOOOT FilterEdges # of edges")
+                finalContours.append([len(approx), area, approx, bbox, i])
 
     finalContours = sorted(finalContours, key = lambda x: x[1], reverse=True) #Sorting based on area (largest first)
     if draw:
@@ -49,11 +49,12 @@ def reorder(points):
     pointsNew[2] = points[np.argmax(diff)]
     return pointsNew
 
-def warpImg(img, points, width, height):
+def warpImg(img, points, width, height, pad=7):
     # print(points)
     points = reorder(points)
     pts1 = np.float32(points)
     pts2 = np.float32([[0,0],[width,0],[0,height],[width,height]])
     matrix = cv2.getPerspectiveTransform(pts1,pts2)
     imgWarp = cv2.warpPerspective(img, matrix, (width,height))
+    imgWarp = imgWarp[pad:imgWarp.shape[0]-pad,pad:imgWarp.shape[1]-pad]
     return imgWarp
