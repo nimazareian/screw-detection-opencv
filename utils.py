@@ -58,3 +58,6 @@ def warpImg(img, points, width, height, pad=7):
     imgWarp = cv2.warpPerspective(img, matrix, (width,height))
     imgWarp = imgWarp[pad:imgWarp.shape[0]-pad,pad:imgWarp.shape[1]-pad]
     return imgWarp
+
+def findDist(pts1, pts2):
+    return ((pts2[0] - pts1[0])**2 + (pts2[1] - pts1[1])**2 )**0.5
