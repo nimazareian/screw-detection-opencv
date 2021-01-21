@@ -4,7 +4,7 @@ import numpy as np
 def empty(val):
     pass
 
-def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, minArea=1000, filterEdges = 0, draw=False):
+def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, minArea=1000, maxArea=1000000, filterEdges = 0, draw=False):
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     imgBlur = cv2.GaussianBlur(imgGray, gaussianBlur,1) # Could tune blue value for better edges - GaussianBlue must be ODD and Positive
     imgCanny = cv2.Canny(imgBlur, cannyThr[0], cannyThr[1])
@@ -17,7 +17,7 @@ def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, mi
     finalContours = []
     for i in contours:
         area = cv2.contourArea(i)
-        if area > minArea:
+        if minArea < area < maxArea:
             peri = cv2.arcLength(i,True) # True for contour being closed
             approx = cv2.approxPolyDP(i, 0.02 * peri, True) # Approximation of edges of contour
             bbox = cv2.boundingRect(approx) # Bounding box
