@@ -37,7 +37,6 @@ def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, mi
     return img, finalContours
 
 def reorder(points):
-    print(points.shape)
     pointsNew = np.zeros_like(points)
     points = points.reshape(4,2)
     add = points.sum(1)
@@ -49,7 +48,7 @@ def reorder(points):
     return pointsNew
 
 
-def drawBoxAroundContour(img, contour, scale=1, drawMinAreaRect=True, drawBoundingRect=False, drawPolylines=False, drawDimensions=True, drawArea=False):
+def drawBoxAroundContour(img, contour, scale=1, drawMinAreaRect=True, drawBoundingRect=False, drawPolylines=False, drawDimensions=True, drawArea=False, offsetDimension=0):
     rect = cv2.minAreaRect(contour[2])
     box = cv2.boxPoints(rect)
     box = np.int0(box)
@@ -58,6 +57,7 @@ def drawBoxAroundContour(img, contour, scale=1, drawMinAreaRect=True, drawBoundi
     nPoints = reorder(box)
     screw_w = round(findDist(nPoints[0], nPoints[1]) / scale, 3)
     screw_h = round(findDist(nPoints[0], nPoints[2]) / scale, 3)
+    maxLength = max(screw_w, screw_h) + offsetDimension
     if drawBoundingRect:
         x, y, w, h = cv2.boundingRect(contour[2]) # Straight rectangle Around contour
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,255, 0), 2)
@@ -66,10 +66,13 @@ def drawBoxAroundContour(img, contour, scale=1, drawMinAreaRect=True, drawBoundi
 
     x, y, w, h = contour[3]
     if drawArea:
-        cv2.putText(img, '{} area'.format(w * h), (x, y - 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+        cv2.putText(img, '{} area'.format(w * h), (x, y + 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
     if drawDimensions:
-        cv2.putText(img, '{} in'.format(screw_w), (x, y + 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
-        cv2.putText(img, '{} in'.format(screw_h), (x, y - 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+        # cv2.putText(img, '{} in'.format(screw_h), (x, y - 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+        roundedLength = round(maxLength, 3)
+        cv2.putText(img, '{} in'.format(roundedLength), (x, y + 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+    # TODO: Return the position of the box aswell
+    return maxLength
 
 
 def warpImg(img, points, width, height, pad=7):
