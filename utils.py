@@ -4,7 +4,7 @@ import numpy as np
 def empty(val):
     pass
 
-def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, minArea=1000, maxArea=1000000, filterEdges = 0, draw=False):
+def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, minArea=1000, maxArea=1000000, filterEdges = 0, drawContours=False):
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     imgBlur = cv2.GaussianBlur(imgGray, gaussianBlur,1) # Could tune blue value for better edges - GaussianBlue must be ODD and Positive
     imgCanny = cv2.Canny(imgBlur, cannyThr[0], cannyThr[1])
@@ -22,16 +22,15 @@ def getContours(img, cannyThr=[200,200], gaussianBlur=(5,5), showCanny=False, mi
             approx = cv2.approxPolyDP(i, 0.02 * peri, True) # Approximation of edges of contour
             bbox = cv2.boundingRect(approx) # Bounding box
             print("bbox:", bbox)
-            if filterEdges > 0: #0  how many edges
+            if filterEdges > 0:
                 if len(approx) == filterEdges:
-                    print("# of edges", len(approx))
-                    finalContours.append([len(approx), area, approx, bbox, i]) # Keep contour
+                    finalContours.append([len(approx), area, approx, bbox, i])
             else:
-                # print("NOOOT FilterEdges # of edges")
+                # if filterEdges set to 0, don't filter based on edge count
                 finalContours.append([len(approx), area, approx, bbox, i])
 
-    finalContours = sorted(finalContours, key = lambda x: x[1], reverse=True) #Sorting based on area (largest first)
-    if draw:
+    finalContours = sorted(finalContours, key = lambda x: x[1], reverse=True) # Sorting based on area (largest first)
+    if drawContours:
         for contour in finalContours:
             cv2.drawContours(img, contour[4], -1, (0,0,255), 3)
 
@@ -48,6 +47,30 @@ def reorder(points):
     pointsNew[1] = points[np.argmin(diff)]
     pointsNew[2] = points[np.argmax(diff)]
     return pointsNew
+
+
+def drawBoxAroundContour(img, contour, scale=1, drawMinAreaRect=True, drawBoundingRect=False, drawPolylines=False, drawDimensions=True, drawArea=False):
+    rect = cv2.minAreaRect(contour[2])
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    if drawMinAreaRect: cv2.drawContours(img, [box], 0, (0, 0, 255), 2)
+
+    nPoints = reorder(box)
+    screw_w = round(findDist(nPoints[0], nPoints[1]) / scale, 3)
+    screw_h = round(findDist(nPoints[0], nPoints[2]) / scale, 3)
+    if drawBoundingRect:
+        x, y, w, h = cv2.boundingRect(contour[2]) # Straight rectangle Around contour
+        cv2.rectangle(img, (x,y), (x+w, y+h), (0,255, 0), 2)
+
+    if drawPolylines: cv2.polylines(img, [contour[2]], True, (0,255,0), 2) # Polylines around contour - True for closed
+
+    x, y, w, h = contour[3]
+    if drawArea:
+        cv2.putText(img, '{} area'.format(w * h), (x, y - 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+    if drawDimensions:
+        cv2.putText(img, '{} in'.format(screw_w), (x, y + 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+        cv2.putText(img, '{} in'.format(screw_h), (x, y - 10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
+
 
 def warpImg(img, points, width, height, pad=7):
     # print(points)
