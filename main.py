@@ -2,15 +2,15 @@ import cv2
 import numpy as np
 import utils
 
-webcam = True
-path = 'resources/screws6.jpg'
+WEBCAM = False
+PATH = 'resources/screws6.jpg'
 cap = cv2.VideoCapture(0)
 cap.set(10, 160)
 cap.set(3, 1920)  # Video Dimensions
 cap.set(4, 1080)
 scale = 100
-widthPaper = int(11 * scale)  # 27.94cm = 11"
-heightPaper = int(8.5 * scale)  # 21.59cm = 8.5"
+widthPaper = int(11 * scale)   # 27.94cm = 11"
+heightPaper = int(8.5 * scale) # 21.59cm = 8.5"
 
 cv2.namedWindow("TrackBars")  # Trackbars on same window need to have same name
 cv2.resizeWindow("TrackBars", 640, 240)
@@ -25,10 +25,10 @@ cv2.createTrackbar("Screw Blur", "TrackBars", 7, 10, utils.empty)
 
 while True:
     # Use a picture or webcam
-    if webcam:
+    if WEBCAM:
         success, img = cap.read()
     else:
-        img = cv2.imread(path)
+        img = cv2.imread(PATH)
 
     # Get trackbar values
     thrBg1 = cv2.getTrackbarPos("Background Threshold 1", "TrackBars")  # 255
