@@ -2,14 +2,14 @@
 import numpy as np
 
 
-class Aruco:
+class CustomAruco:
 
-    def __init__(self, bbox: list, marker_id: int, width=10):
+    def __init__(self, bbox: list, marker_id: int, width=1):
         """
         Creates a new aruco marker
         :param bbox: Bounding box of the aruco marker
         :param marker_id: id of aruco marker
-        :param width: Width of aruco marker in mm
+        :param width: Width of aruco marker in inches
         """
         self.bbox = bbox
         self.id = marker_id
@@ -30,12 +30,13 @@ class Aruco:
         np_point2 = np.asarray(point2)
         return np.linalg.norm(np_point2 - np_point1)
 
-    def mm_to_pix_ratio(self) -> float:
+    def inch_to_pix_ratio(self) -> float:
         """
-        Calculates the mm / pix ratio based on the width of bbox
-        :return: Returns the mm / pix ratio
+        Calculates the in / pix ratio based on the width of bbox
+        :return: Returns the in / pix ratio
+        :return: Returns the in / pix ratio
         """
-        return self.width / Aruco.point_to_point_dist(self.bbox[0], self.bbox[1])
+        return self.width / CustomAruco.point_to_point_dist(self.bbox[0], self.bbox[1])
 
     def dist_to_point(self, point: list) -> float:
         """
@@ -43,10 +44,9 @@ class Aruco:
         :param point: Point to calculate distance to
         :return: Returns the distance in pixels from self top left corner to point
         """
-        # calculate the distance in terms of pixel, divide it by the width of the marker (px), multiply it by 10mm
         point1 = self.get_top_left_point()
-        pixel_dist = Aruco.point_to_point_dist(point, point1)
-        return pixel_dist * self.mm_to_pix_ratio()
+        pixel_dist = CustomAruco.point_to_point_dist(point, point1)
+        return pixel_dist * self.inch_to_pix_ratio()
 
     def __str__(self):
         return f"Aruco Object: id={self.id}, width={self.width}"
