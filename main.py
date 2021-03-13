@@ -5,9 +5,11 @@ import utils
 WEBCAM = False
 PATH = 'resources/screws6.jpg'
 cap = cv2.VideoCapture(0)
-cap.set(10, 160)
-cap.set(3, 1920)  # Video Dimensions
-cap.set(4, 1080)
+cap.set(3, 1280)  # Video Dimensions
+cap.set(4, 720)
+cap.set(10, 2) # Brightness - Refer to https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html
+cap.set(12, 0) # Saturation
+cap.set(11, 1000) # Contrast
 scale = 100
 widthPaper = int(11 * scale)   # 27.94cm = 11"
 heightPaper = int(8.5 * scale) # 21.59cm = 8.5"
@@ -16,10 +18,10 @@ cv2.namedWindow("TrackBars")  # Trackbars on same window need to have same name
 cv2.resizeWindow("TrackBars", 640, 240)
 cv2.createTrackbar("Background Threshold 1", "TrackBars", 255, 255, utils.empty)
 cv2.createTrackbar("Background Threshold 2", "TrackBars", 60, 255, utils.empty)
-cv2.createTrackbar("Screw Threshold 1", "TrackBars", 65, 255, utils.empty)
-cv2.createTrackbar("Screw Threshold 2", "TrackBars", 52, 255, utils.empty)
-cv2.createTrackbar("min_area_s", "TrackBars", 700, 10000, utils.empty)
-cv2.createTrackbar("max_area_s", "TrackBars", 10000, 20000, utils.empty)
+cv2.createTrackbar("Screw Threshold 1", "TrackBars", 150, 255, utils.empty)
+cv2.createTrackbar("Screw Threshold 2", "TrackBars", 189, 255, utils.empty)
+cv2.createTrackbar("min_area_s", "TrackBars", 600, 10000, utils.empty)
+cv2.createTrackbar("max_area_s", "TrackBars", 3800, 20000, utils.empty)
 cv2.createTrackbar("Background Blur", "TrackBars", 5, 10, utils.empty)
 cv2.createTrackbar("Screw Blur", "TrackBars", 7, 10, utils.empty)
 
@@ -31,13 +33,13 @@ while True:
         img = cv2.imread(PATH)
 
     # Get trackbar values
-    thrBg1 = cv2.getTrackbarPos("Background Threshold 1", "TrackBars")  # 255
-    thrBg2 = cv2.getTrackbarPos("Background Threshold 2", "TrackBars")  # 60
+    thrBg1 = cv2.getTrackbarPos("Background Threshold 1", "TrackBars")
+    thrBg2 = cv2.getTrackbarPos("Background Threshold 2", "TrackBars")
     thrS1 = cv2.getTrackbarPos("Screw Threshold 1", "TrackBars")
     thrS2 = cv2.getTrackbarPos("Screw Threshold 2", "TrackBars")
     minArea = cv2.getTrackbarPos("min_area_s", "TrackBars")
     maxArea = cv2.getTrackbarPos("max_area_s", "TrackBars")
-    blurBg = cv2.getTrackbarPos("Background Blur", "TrackBars") # 255
+    blurBg = cv2.getTrackbarPos("Background Blur", "TrackBars")
     blurS = cv2.getTrackbarPos("Screw Blur", "TrackBars")
     if blurBg % 2 == 0:
         blurBg += 1
@@ -59,7 +61,7 @@ while True:
         # Draw box around contour
         if len(contours2) != 0:
             for contour in contours2:
-                utils.drawBoxAroundContour(img2, contour, scale=scale, offsetDimension=-(3/16)-0.03, drawPolylines=False)
+                utils.drawBoxAroundContour(img2, contour, scale=scale, offsetDimension=-(3/16)+0.05, drawPolylines=True)
 
         cv2.imshow("Image 2", img2)
 
